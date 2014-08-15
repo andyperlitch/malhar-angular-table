@@ -28,7 +28,7 @@
           </span>
         </th>
       </tr>
-      <tr ng-if="hasFilterFields()">
+      <tr ng-if="hasFilterFields()" class="mlhr-table-filter-row">
         <th ng-repeat="column in columns">
           <input 
             type="search"
@@ -44,26 +44,30 @@
     <tfoot>
       <tr>
         <td ng-attr-colspan="{{ getActiveColCount() }}">
-          <label>row limit:</label> <input type="text" ng-model="options.rowLimit" value="{{ options.rowLimit }}">&nbsp;&nbsp;
-          <input type="radio" ng-model="options.pagingScheme" value="scroll" name="paging-scroll"> <label for="paging-scroll">scroll</label>&nbsp;&nbsp;
-          <input type="radio" ng-model="options.pagingScheme" value="page" name="paging-page"> <label for="paging-page">paginate</label>&nbsp;&nbsp;
-          <span ng-if="options.pagingScheme === 'page'" mlhr-table-paginate="options" filter-state="filterState"></span>
+          <form novalidate>
+            <label>row limit:</label> <input type="text" ng-model="options.row_limit" value="{{ options.row_limit }}">&nbsp;&nbsp;
+            <input type="radio" ng-model="options.pagingScheme" value="scroll" name="paging-scroll"> <label for="paging-scroll">scroll</label>&nbsp;&nbsp;
+            <input type="radio" ng-model="options.pagingScheme" value="page" name="paging-page"> <label for="paging-page">paginate</label>&nbsp;&nbsp;
+            <span ng-if="options.pagingScheme === 'page'" mlhr-table-paginate="options" filter-state="filterState"></span>
+          </form>
         </td>
       </tr>
     </tfoot>
-    <tbody msd-wheel="onScroll($event)">
+    <tbody msd-wheel="onScroll($event, $delta, $deltaX, $deltaY)" ng-class="options.rowOffset % 2 ? 'offset-odd' : 'offset-even'">
       <tr ng-repeat="
         row in rows 
           | tableRowFilter:columns:searchTerms:filterState 
           | tableRowSorter:columns:sortOrder:sortDirection 
           | limitTo:options.rowOffset - filterState.filterCount 
-          | limitTo:options.rowLimit">
-        <td ng-repeat="column in columns">
-          <span ng-if="column.format && column.format.trustAsHtml" mlhr-table-dynamic="row | tableCellFilter:column" row="row" column="column" selected="selected"></span>
-          <span ng-if="!column.format || !column.format.trustAsHtml" ng-bind="row | tableCellFilter:column"></span>
-        </td>
+          | limitTo:options.row_limit
+        track by row[options.trackBy]">
+        <td ng-repeat="
+          column in columns 
+          track by column.id" class="mlhr-table-cell" mlhr-table-cell></td>
       </tr>
     </tbody>
   </table>
-  <div ng-show="options.pagingScheme === 'scroll'" class="mlhr-table-scroller"></div>
+  <div ng-show="options.pagingScheme === 'scroll'" class="mlhr-table-scroller-wrapper">
+    <div class="mlhr-table-scroller"></div>
+  </div>
 </div>
